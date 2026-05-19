@@ -23,8 +23,19 @@ VibesAudioProcessor::VibesAudioProcessor()
        apvts (*this, nullptr, "Parameters", createParameterLayout())
 #endif
 {
-    oscillator1.initialise ([] (float x) { return std::sin (x); }, 256);
-    oscillator2.initialise ([] (float x) { return std::sin (x); }, 256);
+    // No wavetable — function is called per sample so the waveform parameter
+    // can be read atomically each sample, giving seamless switching with no
+    // phase discontinuity.
+    oscillator1.initialise ([this] (float x) -> float {
+        return *apvts.getRawParameterValue ("osc1Waveform") < 0.5f
+                   ? std::sin (x)
+                   : x / juce::MathConstants<float>::pi;
+    });
+    oscillator2.initialise ([this] (float x) -> float {
+        return *apvts.getRawParameterValue ("osc2Waveform") < 0.5f
+                   ? std::sin (x)
+                   : x / juce::MathConstants<float>::pi;
+    });
 }
 
 VibesAudioProcessor::~VibesAudioProcessor() {}
@@ -50,14 +61,25 @@ juce::AudioProcessorValueTreeState::ParameterLayout VibesAudioProcessor::createP
         juce::ParameterID("release", 1), "Release",
         juce::NormalisableRange<float> (0.001f, 10.0f, 0.001f, 0.5f), 0.5f));
 
+    params.push_back (std::make_unique<juce::AudioParameterBool> (
+        juce::ParameterID ("osc1Enabled", 1), "Osc 1 Enabled", true));
+    params.push_back (std::make_unique<juce::AudioParameterChoice> (
+        juce::ParameterID ("osc1Waveform", 1), "Osc 1 Waveform",
+        juce::StringArray { "Sine", "Saw" }, 0));
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
         juce::ParameterID ("osc1Gain", 1), "Osc 1 Gain",
         juce::NormalisableRange<float> (0.0f, 1.0f, 0.01f), 0.7f));
+    params.push_back (std::make_unique<juce::AudioParameterInt> (
+        juce::ParameterID ("osc1Octave", 1), "Osc 1 Octave", -2, 2, 0));
 
+    params.push_back (std::make_unique<juce::AudioParameterBool> (
+        juce::ParameterID ("osc2Enabled", 1), "Osc 2 Enabled", true));
+    params.push_back (std::make_unique<juce::AudioParameterChoice> (
+        juce::ParameterID ("osc2Waveform", 1), "Osc 2 Waveform",
+        juce::StringArray { "Sine", "Saw" }, 0));
     params.push_back (std::make_unique<juce::AudioParameterFloat> (
         juce::ParameterID ("osc2Gain", 1), "Osc 2 Gain",
         juce::NormalisableRange<float> (0.0f, 1.0f, 0.01f), 0.5f));
-
     params.push_back (std::make_unique<juce::AudioParameterInt> (
         juce::ParameterID ("osc2Octave", 1), "Osc 2 Octave", -2, 2, 0));
 
@@ -164,10 +186,15 @@ void VibesAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     osc1GainSmooth.setTargetValue (*apvts.getRawParameterValue ("osc1Gain"));
     osc2GainSmooth.setTargetValue (*apvts.getRawParameterValue ("osc2Gain"));
 
-    // Update osc2 frequency every block so octave changes take effect on held notes
-    const int   octave           = (int) *apvts.getRawParameterValue ("osc2Octave");
-    const float octaveMultiplier = std::pow (2.0f, (float) octave);
-    oscillator2.setFrequency (currentFrequency * octaveMultiplier);
+    const bool  osc1On   = *apvts.getRawParameterValue ("osc1Enabled") >= 0.5f;
+    const bool  osc2On   = *apvts.getRawParameterValue ("osc2Enabled") >= 0.5f;
+
+    // Update both oscillator frequencies every block so octave/enable changes
+    // apply immediately to held notes
+    const float osc1Mult = std::pow (2.0f, (float)(int) *apvts.getRawParameterValue ("osc1Octave"));
+    const float osc2Mult = std::pow (2.0f, (float)(int) *apvts.getRawParameterValue ("osc2Octave"));
+    oscillator1.setFrequency (currentFrequency * osc1Mult);
+    oscillator2.setFrequency (currentFrequency * osc2Mult);
 
     for (const auto metadata : midiMessages)
     {
@@ -176,8 +203,8 @@ void VibesAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
         if (msg.isNoteOn())
         {
             currentFrequency = (float) juce::MidiMessage::getMidiNoteInHertz (msg.getNoteNumber());
-            oscillator1.setFrequency (currentFrequency);
-            oscillator2.setFrequency (currentFrequency * octaveMultiplier);
+            oscillator1.setFrequency (currentFrequency * osc1Mult);
+            oscillator2.setFrequency (currentFrequency * osc2Mult);
             adsr.noteOn();
         }
         else if (msg.isNoteOff())
@@ -192,16 +219,22 @@ void VibesAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     {
         const int numSamples = buffer.getNumSamples();
 
-        // Oscillator 1 → channel 0
-        auto block1 = juce::dsp::AudioBlock<float> (buffer).getSingleChannelBlock (0);
-        oscillator1.process (juce::dsp::ProcessContextReplacing<float> (block1));
+        // Generate into channel 0 (osc1) and monoBuffer (osc2)
+        // Disabled oscillators leave their buffer zeroed — the gain multiply handles silence
+        if (osc1On)
+        {
+            auto block1 = juce::dsp::AudioBlock<float> (buffer).getSingleChannelBlock (0);
+            oscillator1.process (juce::dsp::ProcessContextReplacing<float> (block1));
+        }
 
-        // Oscillator 2 → monoBuffer
         monoBuffer.clear();
-        auto block2 = juce::dsp::AudioBlock<float> (monoBuffer).getSubBlock (0, (size_t) numSamples);
-        oscillator2.process (juce::dsp::ProcessContextReplacing<float> (block2));
+        if (osc2On)
+        {
+            auto block2 = juce::dsp::AudioBlock<float> (monoBuffer).getSubBlock (0, (size_t) numSamples);
+            oscillator2.process (juce::dsp::ProcessContextReplacing<float> (block2));
+        }
 
-        // Mix both oscillators into channel 0 with individual smoothed gains
+        // Mix with individual smoothed gains
         auto*       ch0      = buffer.getWritePointer (0);
         const auto* osc2Data = monoBuffer.getReadPointer (0);
 

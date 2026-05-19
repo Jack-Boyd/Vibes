@@ -23,10 +23,7 @@ public:
     void paint (juce::Graphics& g) override;
 
 private:
-    // Called on any thread — must not touch the UI directly
     void parameterChanged (const juce::String&, float) override;
-
-    // Called on the message thread — safe to repaint
     void handleAsyncUpdate() override;
 
     juce::AudioProcessorValueTreeState& apvts;
@@ -39,24 +36,46 @@ public:
     VibesAudioProcessorEditor (VibesAudioProcessor&);
     ~VibesAudioProcessorEditor() override;
 
-    //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
 
 private:
     VibesAudioProcessor& audioProcessor;
 
-    ADSRVisualizer adsrVisualizer;
+    // --- Oscillator 1 ---
+    juce::Label      osc1Label;
+    juce::TextButton osc1EnableButton;
+    juce::ComboBox   osc1WaveCombo;
+    juce::Label      osc1WaveLabel;
+    juce::Slider     osc1GainSlider, osc1OctaveSlider;
+    juce::Label      osc1GainLabel,  osc1OctaveLabel;
 
-    juce::Slider attackSlider, decaySlider, sustainSlider, releaseSlider;
-    juce::Label  attackLabel,  decayLabel,  sustainLabel,  releaseLabel;
+    // --- Oscillator 2 ---
+    juce::Label      osc2Label;
+    juce::TextButton osc2EnableButton;
+    juce::ComboBox   osc2WaveCombo;
+    juce::Label      osc2WaveLabel;
+    juce::Slider     osc2GainSlider, osc2OctaveSlider;
+    juce::Label      osc2GainLabel,  osc2OctaveLabel;
 
-    juce::Slider osc1GainSlider, osc2GainSlider, osc2OctaveSlider;
-    juce::Label  osc1GainLabel,  osc2GainLabel,  osc2OctaveLabel;
+    // --- ADSR ---
+    ADSRVisualizer   adsrVisualizer;
+    juce::Slider     attackSlider, decaySlider, sustainSlider, releaseSlider;
+    juce::Label      attackLabel,  decayLabel,  sustainLabel,  releaseLabel;
 
-    using Attachment = juce::AudioProcessorValueTreeState::SliderAttachment;
-    Attachment attackAttach,   decayAttach,    sustainAttach,    releaseAttach;
-    Attachment osc1GainAttach, osc2GainAttach, osc2OctaveAttach;
+    // Attachments — declared after components so they are destroyed first
+    using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
+    using ButtonAttachment = juce::AudioProcessorValueTreeState::ButtonAttachment;
+    using ComboAttachment  = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
+
+    ButtonAttachment osc1EnableAttach,  osc2EnableAttach;
+    ComboAttachment  osc1WaveAttach,    osc2WaveAttach;
+    SliderAttachment osc1GainAttach,    osc1OctaveAttach;
+    SliderAttachment osc2GainAttach,    osc2OctaveAttach;
+    SliderAttachment attackAttach,      decayAttach, sustainAttach, releaseAttach;
+
+    // Stored in resized(), used in paint() for section backgrounds
+    juce::Rectangle<int> osc1Bounds, osc2Bounds, adsrBounds;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VibesAudioProcessorEditor)
 };
