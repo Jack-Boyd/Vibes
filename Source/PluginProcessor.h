@@ -9,6 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "SynthVoice.h"
 
 //==============================================================================
 class VibesAudioProcessor  : public juce::AudioProcessor
@@ -56,13 +57,7 @@ public:
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
-    juce::dsp::Oscillator<float> oscillator1, oscillator2;
-    juce::AudioBuffer<float>    monoBuffer;
-    float                       currentFrequency = 440.0f;
-
-    juce::ADSR adsr;
-
-    juce::SmoothedValue<float> osc1GainSmooth, osc2GainSmooth;
+    juce::Synthesiser synthesiser;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VibesAudioProcessor)

@@ -12,7 +12,14 @@
             file="Source/PluginProcessor.h"/>
       <FILE id="jEpKag" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
-      <FILE id="BLK05o" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="BLK05o" name="PluginEditor.h" compile="0" resource="0"
+            file="Source/PluginEditor.h"/>
+      <FILE id="Pb1Osc" name="PolyBlepOscillator.h" compile="0" resource="0"
+            file="Source/PolyBlepOscillator.h"/>
+      <FILE id="SvH2zW" name="SynthVoice.h" compile="0" resource="0"
+            file="Source/SynthVoice.h"/>
+      <FILE id="SvC3qR" name="SynthVoice.cpp" compile="1" resource="0"
+            file="Source/SynthVoice.cpp"/>
     </GROUP>
   </MAINGROUP>
   <MODULES>

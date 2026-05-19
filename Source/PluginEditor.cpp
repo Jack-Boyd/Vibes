@@ -146,8 +146,10 @@ VibesAudioProcessorEditor::VibesAudioProcessorEditor (VibesAudioProcessor& p)
     auto configureWaveCombo = [&] (juce::ComboBox& combo, juce::Label& label,
                                    const juce::String& paramID)
     {
-        combo.addItem ("Sine", 1);
-        combo.addItem ("Saw",  2);
+        combo.addItem ("Sine",     1);
+        combo.addItem ("Saw",      2);
+        combo.addItem ("Square",   3);
+        combo.addItem ("Triangle", 4);
         combo.setSelectedId (static_cast<int> (*p.apvts.getRawParameterValue (paramID)) + 1,
                              juce::dontSendNotification);
         addAndMakeVisible (combo);
