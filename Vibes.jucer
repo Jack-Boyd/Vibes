@@ -6,20 +6,25 @@
               cppLanguageStandard="20">
   <MAINGROUP id="UG99QB" name="Vibes">
     <GROUP id="{6C662DB3-FCC3-9E06-CE16-5D73A2D8CCDC}" name="Source">
-      <FILE id="Or0zuj" name="PluginProcessor.cpp" compile="1" resource="0"
-            file="Source/PluginProcessor.cpp"/>
-      <FILE id="FyEbDH" name="PluginProcessor.h" compile="0" resource="0"
-            file="Source/PluginProcessor.h"/>
+      <FILE id="y2OYHt" name="ADSRVisualiser.h" compile="0" resource="0"
+            file="Source/ADSRVisualiser.h"/>
+      <FILE id="n8M1HM" name="ADSRVisualiser.cpp" compile="1" resource="0"
+            file="Source/ADSRVisualiser.cpp"/>
+      <FILE id="OcH4pQ" name="OscillatorComponent.h" compile="0" resource="0"
+            file="Source/OscillatorComponent.h"/>
+      <FILE id="OcC5rS" name="OscillatorComponent.cpp" compile="1" resource="0"
+            file="Source/OscillatorComponent.cpp"/>
+      <FILE id="BLK05o" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
       <FILE id="jEpKag" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
-      <FILE id="BLK05o" name="PluginEditor.h" compile="0" resource="0"
-            file="Source/PluginEditor.h"/>
+      <FILE id="FyEbDH" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+      <FILE id="Or0zuj" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
       <FILE id="Pb1Osc" name="PolyBlepOscillator.h" compile="0" resource="0"
             file="Source/PolyBlepOscillator.h"/>
-      <FILE id="SvH2zW" name="SynthVoice.h" compile="0" resource="0"
-            file="Source/SynthVoice.h"/>
-      <FILE id="SvC3qR" name="SynthVoice.cpp" compile="1" resource="0"
-            file="Source/SynthVoice.cpp"/>
+      <FILE id="SvH2zW" name="SynthVoice.h" compile="0" resource="0" file="Source/SynthVoice.h"/>
+      <FILE id="SvC3qR" name="SynthVoice.cpp" compile="1" resource="0" file="Source/SynthVoice.cpp"/>
     </GROUP>
   </MAINGROUP>
   <MODULES>

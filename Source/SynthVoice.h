@@ -45,9 +45,9 @@ public:
 private:
     juce::AudioProcessorValueTreeState& apvts;
 
-    PolyBlepOscillator         oscillator1, oscillator2;
+    PolyBlepOscillator         oscillator1, oscillator2, oscillator3;
     juce::ADSR                 adsr;
-    juce::SmoothedValue<float> osc1GainSmooth, osc2GainSmooth;
+    juce::SmoothedValue<float> osc1GainSmooth, osc2GainSmooth, osc3GainSmooth;
     float                      noteFrequency = 440.0f;
     bool                       isPrepared    = false;
 
