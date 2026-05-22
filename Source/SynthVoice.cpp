@@ -37,9 +37,12 @@ void VibesSynthVoice::startNote (int midiNoteNumber, float /*velocity*/,
   const int osc1OctIdx = juce::jlimit (0, 4, (int) *apvts.getRawParameterValue ("osc1Octave") + 2);
   const int osc2OctIdx = juce::jlimit (0, 4, (int) *apvts.getRawParameterValue ("osc2Octave") + 2);
   const int osc3OctIdx = juce::jlimit (0, 4, (int) *apvts.getRawParameterValue ("osc3Octave") + 2);
-  oscillator1.setFrequency (noteFrequency * kOctaveMult[osc1OctIdx]);
-  oscillator2.setFrequency (noteFrequency * kOctaveMult[osc2OctIdx]);
-  oscillator3.setFrequency (noteFrequency * kOctaveMult[osc3OctIdx]);
+  oscillator1.setFrequency (noteFrequency * kOctaveMult[osc1OctIdx]
+    * std::pow (2.0f, *apvts.getRawParameterValue ("osc1Fine") / 1200.0f));
+  oscillator2.setFrequency (noteFrequency * kOctaveMult[osc2OctIdx]
+    * std::pow (2.0f, *apvts.getRawParameterValue ("osc2Fine") / 1200.0f));
+  oscillator3.setFrequency (noteFrequency * kOctaveMult[osc3OctIdx]
+    * std::pow (2.0f, *apvts.getRawParameterValue ("osc3Fine") / 1200.0f));
 
   osc1GainSmooth.setCurrentAndTargetValue (*apvts.getRawParameterValue ("osc1Gain"));
   osc2GainSmooth.setCurrentAndTargetValue (*apvts.getRawParameterValue ("osc2Gain"));
@@ -96,13 +99,16 @@ void VibesSynthVoice::renderNextBlock (juce::AudioBuffer<float>& outputBuffer,
   oscillator3.setWaveform (static_cast<PolyBlepOscillator::Waveform> (
     (int) *apvts.getRawParameterValue ("osc3Waveform")));
 
-  // Update frequencies when octave knob changes on a held note
+  // Update frequencies when octave/fine knobs change on a held note
   const int osc1OctIdx = juce::jlimit (0, 4, (int) *apvts.getRawParameterValue ("osc1Octave") + 2);
   const int osc2OctIdx = juce::jlimit (0, 4, (int) *apvts.getRawParameterValue ("osc2Octave") + 2);
   const int osc3OctIdx = juce::jlimit (0, 4, (int) *apvts.getRawParameterValue ("osc3Octave") + 2);
-  oscillator1.setFrequency (noteFrequency * kOctaveMult[osc1OctIdx]);
-  oscillator2.setFrequency (noteFrequency * kOctaveMult[osc2OctIdx]);
-  oscillator3.setFrequency (noteFrequency * kOctaveMult[osc3OctIdx]);
+  oscillator1.setFrequency (noteFrequency * kOctaveMult[osc1OctIdx]
+    * std::pow (2.0f, *apvts.getRawParameterValue ("osc1Fine") / 1200.0f));
+  oscillator2.setFrequency (noteFrequency * kOctaveMult[osc2OctIdx]
+    * std::pow (2.0f, *apvts.getRawParameterValue ("osc2Fine") / 1200.0f));
+  oscillator3.setFrequency (noteFrequency * kOctaveMult[osc3OctIdx]
+    * std::pow (2.0f, *apvts.getRawParameterValue ("osc3Fine") / 1200.0f));
 
   // Cache write pointers to avoid per-sample getWritePointer calls
   const int numChannels = outputBuffer.getNumChannels();

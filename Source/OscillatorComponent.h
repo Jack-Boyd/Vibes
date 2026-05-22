@@ -64,7 +64,8 @@ public:
                        const juce::String& enabledID,
                        const juce::String& waveformID,
                        const juce::String& gainID,
-                       const juce::String& octaveID);
+                       const juce::String& octaveID,
+                       const juce::String& fineID);
 
   void paint   (juce::Graphics& g) override;
   void resized () override;
@@ -73,10 +74,10 @@ private:
   juce::Label      nameLabel;
   PowerButton      enableButton;
   WaveformSelector waveSelector;
-  juce::Slider     gainSlider,   octaveSlider;
-  juce::Label      gainLabel,    octaveLabel;
+  juce::Slider     gainSlider,   octaveSlider,   fineSlider;
+  juce::Label      gainLabel,    octaveLabel,    fineLabel;
 
   // Attachments declared after components so they are destroyed first
   using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
-  SliderAttachment gainAttach, octaveAttach;
+  SliderAttachment gainAttach, octaveAttach, fineAttach;
 };

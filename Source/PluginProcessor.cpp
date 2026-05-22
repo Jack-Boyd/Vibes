@@ -61,6 +61,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout VibesAudioProcessor::createP
     juce::NormalisableRange<float> (0.0f, 1.0f, 0.01f), 0.7f));
   params.push_back (std::make_unique<juce::AudioParameterInt> (
     juce::ParameterID ("osc1Octave",   1), "Osc 1 Octave", -2, 2, 0));
+  params.push_back (std::make_unique<juce::AudioParameterFloat> (
+    juce::ParameterID ("osc1Fine",     1), "Osc 1 Fine",
+    juce::NormalisableRange<float> (-100.0f, 100.0f, 0.1f), 0.0f));
 
   params.push_back (std::make_unique<juce::AudioParameterBool> (
     juce::ParameterID ("osc2Enabled",  1), "Osc 2 Enabled", true));
@@ -72,7 +75,10 @@ juce::AudioProcessorValueTreeState::ParameterLayout VibesAudioProcessor::createP
     juce::NormalisableRange<float> (0.0f, 1.0f, 0.01f), 0.5f));
   params.push_back (std::make_unique<juce::AudioParameterInt> (
     juce::ParameterID ("osc2Octave",   1), "Osc 2 Octave", -2, 2, 0));
-  
+  params.push_back (std::make_unique<juce::AudioParameterFloat> (
+    juce::ParameterID ("osc2Fine",     1), "Osc 2 Fine",
+    juce::NormalisableRange<float> (-100.0f, 100.0f, 0.1f), 0.0f));
+
   params.push_back (std::make_unique<juce::AudioParameterBool> (
     juce::ParameterID ("osc3Enabled",  1), "Osc 3 Enabled", true));
   params.push_back (std::make_unique<juce::AudioParameterChoice> (
@@ -83,6 +89,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout VibesAudioProcessor::createP
     juce::NormalisableRange<float> (0.0f, 1.0f, 0.01f), 0.5f));
   params.push_back (std::make_unique<juce::AudioParameterInt> (
     juce::ParameterID ("osc3Octave",   1), "Osc 3 Octave", -2, 2, 0));
+  params.push_back (std::make_unique<juce::AudioParameterFloat> (
+    juce::ParameterID ("osc3Fine",     1), "Osc 3 Fine",
+    juce::NormalisableRange<float> (-100.0f, 100.0f, 0.1f), 0.0f));
 
   return { params.begin(), params.end() };
 }

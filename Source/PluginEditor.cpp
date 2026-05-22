@@ -15,15 +15,17 @@
 //==============================================================================
 VibesAudioProcessorEditor::VibesAudioProcessorEditor (VibesAudioProcessor& p)
   : AudioProcessorEditor (&p), audioProcessor (p),
-    osc1 (p.apvts, "OSC 1", "osc1Enabled", "osc1Waveform", "osc1Gain", "osc1Octave"),
-    osc2 (p.apvts, "OSC 2", "osc2Enabled", "osc2Waveform", "osc2Gain", "osc2Octave"),
-    osc3 (p.apvts, "OSC 3", "osc3Enabled", "osc3Waveform", "osc3Gain", "osc3Octave"),
+    osc1 (p.apvts, "OSC 1", "osc1Enabled", "osc1Waveform", "osc1Gain", "osc1Octave", "osc1Fine"),
+    osc2 (p.apvts, "OSC 2", "osc2Enabled", "osc2Waveform", "osc2Gain", "osc2Octave", "osc2Fine"),
+    osc3 (p.apvts, "OSC 3", "osc3Enabled", "osc3Waveform", "osc3Gain", "osc3Octave", "osc3Fine"),
     adsrVisualizer (p.apvts),
     attackAttach   (p.apvts, "attack",  attackSlider),
     decayAttach    (p.apvts, "decay",   decaySlider),
     sustainAttach  (p.apvts, "sustain", sustainSlider),
     releaseAttach  (p.apvts, "release", releaseSlider)
 {
+  setLookAndFeel (&laf);
+
   addAndMakeVisible (osc1);
   addAndMakeVisible (osc2);
   addAndMakeVisible (osc3);
@@ -35,20 +37,23 @@ VibesAudioProcessorEditor::VibesAudioProcessorEditor (VibesAudioProcessor& p)
                                        std::tuple { &releaseSlider, &releaseLabel, "Release" } })
   {
     slider->setSliderStyle (juce::Slider::RotaryVerticalDrag);
-    slider->setTextBoxStyle (juce::Slider::TextBoxBelow, false, 64, 18);
+    slider->setTextBoxStyle (juce::Slider::NoTextBox, true, 0, 0);
     addAndMakeVisible (*slider);
 
     label->setText (name, juce::dontSendNotification);
-    label->setFont (juce::FontOptions (11.0f));
-    label->setColour (juce::Label::textColourId, juce::Colour (0xff9399b2));
+    label->setFont (juce::FontOptions (10.0f));
+    label->setColour (juce::Label::textColourId, juce::Colour (0xff6c7086));
     label->setJustificationType (juce::Justification::centred);
     addAndMakeVisible (*label);
   }
 
-  setSize (600, 550);
+  setSize (600, 580);
 }
 
-VibesAudioProcessorEditor::~VibesAudioProcessorEditor() {}
+VibesAudioProcessorEditor::~VibesAudioProcessorEditor()
+{
+  setLookAndFeel (nullptr);
+}
 
 //==============================================================================
 void VibesAudioProcessorEditor::paint (juce::Graphics& g)
@@ -70,9 +75,9 @@ void VibesAudioProcessorEditor::resized()
   auto area = getLocalBounds().reduced (10);
   area.removeFromTop (40);
 
-  constexpr int oscRowH = 75;
+  constexpr int oscRowH = 90;
   constexpr int gapH    = 6;
-  constexpr int labelH  = 18;
+  constexpr int labelH  = 13;
 
   osc1.setBounds (area.removeFromTop (oscRowH));  area.removeFromTop (gapH);
   osc2.setBounds (area.removeFromTop (oscRowH));  area.removeFromTop (gapH);

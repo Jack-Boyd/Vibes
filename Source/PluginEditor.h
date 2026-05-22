@@ -12,6 +12,7 @@
 #include "ADSRVisualiser.h"
 #include "PluginProcessor.h"
 #include "OscillatorComponent.h"
+#include "VibesLookAndFeel.h"
 
 //==============================================================================
 class VibesAudioProcessorEditor : public juce::AudioProcessorEditor
@@ -25,6 +26,8 @@ public:
 
 private:
   VibesAudioProcessor& audioProcessor;
+
+  VibesLookAndFeel laf;
 
   OscillatorComponent osc1, osc2, osc3;
 

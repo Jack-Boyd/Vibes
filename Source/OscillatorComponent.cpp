@@ -92,8 +92,24 @@ void WaveformSelector::handleAsyncUpdate()
 
 void WaveformSelector::mouseDown (const juce::MouseEvent& e)
 {
-  const int clicked = juce::jlimit (0, kNumWaveforms - 1,
-                                    (int) ((float) e.x / (float) getWidth() * kNumWaveforms));
+  const int rowCount0 = 3;
+  const int rowCount1 = 2;
+  int clicked;
+
+  if (e.y < getHeight() / 2)
+  {
+    const int col = juce::jlimit (0, rowCount0 - 1,
+                                  (int) ((float) e.x / (float) getWidth() * rowCount0));
+    clicked = col;
+  }
+  else
+  {
+    const float iconW    = (float) getWidth() / rowCount0;
+    const float offsetX  = ((float) getWidth() - rowCount1 * iconW) * 0.5f;
+    const int   col      = juce::jlimit (0, rowCount1 - 1,
+                                         (int) ((e.x - offsetX) / iconW));
+    clicked = rowCount0 + col;
+  }
 
   if (auto* param = apvts.getParameter (parameterID))
   {
@@ -186,13 +202,22 @@ void WaveformSelector::drawWaveformIcon (juce::Graphics& g, juce::Rectangle<floa
 void WaveformSelector::paint (juce::Graphics& g)
 {
   const int   selected = juce::roundToInt (apvts.getRawParameterValue (parameterID)->load());
-  const float iconW    = (float) getWidth() / kNumWaveforms;
-  const float iconH    = (float) getHeight();
+  const float rowH     = (float) getHeight() * 0.5f;
+  const float w        = (float) getWidth();
 
-  for (int i = 0; i < kNumWaveforms; ++i)
+  // Top row: icons 0, 1, 2
+  const float iconW0 = w / 3.0f;
+  for (int i = 0; i < 3; ++i)
   {
-    auto bounds = juce::Rectangle<float> (i * iconW, 0.0f, iconW, iconH).reduced (1.5f);
+    auto bounds = juce::Rectangle<float> (i * iconW0, 0.0f, iconW0, rowH).reduced (1.5f);
     drawWaveformIcon (g, bounds, i, i == selected);
+  }
+
+  // Bottom row: icons 3, 4 — same width as top row
+  for (int i = 0; i < 2; ++i)
+  {
+    auto bounds = juce::Rectangle<float> (i * iconW0, rowH, iconW0, rowH).reduced (1.5f);
+    drawWaveformIcon (g, bounds, 3 + i, (3 + i) == selected);
   }
 }
 
@@ -202,11 +227,13 @@ OscillatorComponent::OscillatorComponent (juce::AudioProcessorValueTreeState& ap
                                           const juce::String& enabledID,
                                           const juce::String& waveformID,
                                           const juce::String& gainID,
-                                          const juce::String& octaveID)
+                                          const juce::String& octaveID,
+                                          const juce::String& fineID)
   : enableButton (apvts, enabledID),
     waveSelector (apvts, waveformID),
     gainAttach   (apvts, gainID,    gainSlider),
-    octaveAttach (apvts, octaveID,  octaveSlider)
+    octaveAttach (apvts, octaveID,  octaveSlider),
+    fineAttach   (apvts, fineID,    fineSlider)
 {
   nameLabel.setText (oscName, juce::dontSendNotification);
   nameLabel.setFont (juce::FontOptions (13.0f, juce::Font::bold));
@@ -218,15 +245,16 @@ OscillatorComponent::OscillatorComponent (juce::AudioProcessorValueTreeState& ap
   addAndMakeVisible (waveSelector);
 
   for (auto [slider, label, name] : { std::tuple { &gainSlider,   &gainLabel,   "Gain"   },
-                                      std::tuple { &octaveSlider, &octaveLabel, "Octave" } })
+                                      std::tuple { &octaveSlider, &octaveLabel, "Octave" },
+                                      std::tuple { &fineSlider,   &fineLabel,   "Fine"   } })
   {
     slider->setSliderStyle (juce::Slider::RotaryVerticalDrag);
-    slider->setTextBoxStyle (juce::Slider::TextBoxBelow, false, 64, 18);
+    slider->setTextBoxStyle (juce::Slider::NoTextBox, true, 0, 0);
     addAndMakeVisible (*slider);
 
     label->setText (name, juce::dontSendNotification);
-    label->setFont (juce::FontOptions (11.0f));
-    label->setColour (juce::Label::textColourId, juce::Colour (0xff9399b2));
+    label->setFont (juce::FontOptions (10.0f));
+    label->setColour (juce::Label::textColourId, juce::Colour (0xff6c7086));
     label->setJustificationType (juce::Justification::centred);
     addAndMakeVisible (*label);
   }
@@ -240,7 +268,7 @@ void OscillatorComponent::paint (juce::Graphics& g)
 
 void OscillatorComponent::resized()
 {
-  constexpr int labelH = 18;
+  constexpr int labelH = 13;
   constexpr int leftW  = 80;
   constexpr int waveW  = 130;
 
@@ -253,13 +281,17 @@ void OscillatorComponent::resized()
 
   waveSelector.setBounds (row.removeFromLeft (waveW).reduced (4));
 
-  const int halfW = row.getWidth() / 2;
+  const int thirdW = row.getWidth() / 3;
 
-  auto gainCol = row.removeFromLeft (halfW).reduced (8, 0);
+  auto gainCol = row.removeFromLeft (thirdW).reduced (6, 0);
   gainLabel.setBounds  (gainCol.removeFromBottom (labelH));
   gainSlider.setBounds (gainCol);
 
-  auto octCol = row.reduced (8, 0);
+  auto octCol = row.removeFromLeft (thirdW).reduced (6, 0);
   octaveLabel.setBounds  (octCol.removeFromBottom (labelH));
   octaveSlider.setBounds (octCol);
+
+  auto fineCol = row.reduced (6, 0);
+  fineLabel.setBounds  (fineCol.removeFromBottom (labelH));
+  fineSlider.setBounds (fineCol);
 }
